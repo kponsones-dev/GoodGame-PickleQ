@@ -1,183 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>KitchenSync - Smart Pickleball System</title>
-
-<style>
-/* Universal Box Sizing to prevent width overflow */
-* {
-    box-sizing: border-box;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    padding: 15px;
-    background: #fdfdfd;
-    color: #333;
-    margin: 0;
-}
-
-h2, h3, h4 { margin-top: 0; }
-
-.infoBox {
-    background: #f5f5f5;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 14px;
-    border-left: 4px solid #2e7d32;
-    line-height: 1.6;
-}
-
-.card {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-/* Reusing your grid logic to automatically manage 1-3 columns natively */
-.modesGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-/* Badges following your application palette rules */
-.badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    float: right;
-}
-.badge.social { background: #e8f5e9; color: #2e7d32; }
-.badge.comp { background: #e3f2fd; color: #1565c0; }
-.badge.balanced { background: #fff3e0; color: #e65100; }
-
-p.description {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #666;
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
-
-button {
-    cursor: pointer;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #f5f5f5;
-    font-weight: bold;
-    font-size: 15px;
-    width: 100%;
-    transition: background 0.2s ease;
-}
-button:hover { background: #e0e0e0; }
-
-/* Action buttons pulling explicitly from your design color profiles */
-.actionBtn { background: #2e7d32; color: white; border: none; }
-.actionBtn:hover { background: #1b5e20; }
-
-.startMatchBtn { background: #1565c0; color: white; border: none; }
-.startMatchBtn:hover { background: #0d47a1; }
-
-.amberBtn { background: #e65100; color: white; border: none; }
-.amberBtn:hover { background: #bf360c; }
-
-footer {
-    margin-top: 30px;
-    text-align: center;
-    font-size: 12px;
-    color: #888;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-}
-
-/* Mobile Overrides matching your core layout breakpoints */
-@media (max-width: 600px) {
-    h2 { font-size: 20px; }
-    .modesGrid { grid-template-columns: 1fr; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PickleQueue - Matchmaking Setup</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Page-Specific CSS -->
+  <link href="css/index.css" rel="stylesheet">
 </head>
+<body class="py-4 py-md-5">
 
-<body>
-
-<h2>🏓 KitchenSync <span style="font-size: 14px; color: #666; font-weight: normal;">(VibeCoded by Whiteuu)</span></h2>
-
-<div class="infoBox">
-    <div style="font-weight: bold; margin-bottom: 4px; font-size: 15px;">🏁 Matchmaking Session Setup</div>
-    Select a rotation mode below to begin organizing your session courts, queues, and automated score tallies.
-</div>
-
-<div class="modesGrid">
+  <div class="container" style="max-width: 800px;">
     
-    <!-- Mode 1: Round Robin -->
-    <div class="card">
-        <div>
-            <span class="badge social">Social Mixer</span>
-            <h3 style="margin-bottom: 5px;">🔄 Round Robin</h3>
-            <p class="description">
-                Randomizes all pool participants and matches up partners/opponents dynamic allocations. Ideal for fluid group structures ensuring maximum unique pairings.
-            </p>
+    <!-- Header -->
+    <header class="d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-dribbble text-primary fs-2"></i>
+        <h1 class="h3 mb-0 fw-bold">PickleQueue</h1>
+      </div>
+      <div id="dbConnectionStatus" class="badge bg-secondary db-badge px-2 py-1">
+        <i class="bi bi-plug-fill me-1"></i>Connecting...
+      </div>
+    </header>
+
+    <!-- Main Setup Form Card -->
+    <main class="card mb-4">
+      <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <h2 class="h5 mb-0 fw-semibold text-secondary">Start New Game Session</h2>
+        <span class="badge bg-light text-dark border" id="rosterCountBadge">0 Players in Roster</span>
+      </div>
+
+      <div class="card-body p-4">
+        <form id="sessionForm" onsubmit="event.preventDefault(); startNewSession();">
+          
+          <!-- 1. Game Session Textbox -->
+          <div class="mb-4">
+            <label for="gameNameInput" class="form-label fw-medium">Game Session Name</label>
+            <input type="text" class="form-control form-control-lg" id="gameNameInput" placeholder="e.g., Friday Night Open Play" required>
+          </div>
+
+          <!-- 2. Game Type Dropdown -->
+          <div class="mb-4">
+            <label for="gameTypeSelect" class="form-label fw-medium">Game Type</label>
+            <select class="form-select form-select-lg" id="gameTypeSelect" required>
+              <option value="" disabled selected>Loading game types from database...</option>
+            </select>
+            <!-- Game Type Description Placeholder -->
+            <div id="gameTypeDescription" class="form-text text-muted mt-1 small" style="display: none;"></div>
+          </div>
+
+          <!-- 3. Player Roster Entry -->
+          <div class="mb-4">
+            <label class="form-label fw-medium d-flex justify-content-between align-items-center">
+              <span>Add Players to Roster</span>
+            </label>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs nav-fill mb-3" id="playerEntryTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-medium" id="single-tab" data-bs-toggle="tab" data-bs-target="#single-pane" type="button" role="tab">
+                  <i class="bi bi-search me-1"></i> Single Player Search
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link fw-medium" id="multi-tab" data-bs-toggle="tab" data-bs-target="#multi-pane" type="button" role="tab">
+                  <i class="bi bi-card-text me-1"></i> Bulk Multi-Line Entry
+                </button>
+              </li>
+            </ul>
+
+            <div class="tab-content" id="playerEntryTabContent">
+              
+              <!-- TAB 1: Single Player Search -->
+              <div class="tab-pane fade show active" id="single-pane" role="tabpanel">
+                <div class="position-relative">
+                  <div class="input-group">
+                    <input type="text" id="singlePlayerInput" class="form-control" placeholder="Search existing player or type new name..." autocomplete="off" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); addSinglePlayerFromInput(); }">
+                    <button type="button" id="addSinglePlayerBtn" class="btn btn-outline-primary fw-medium" onclick="addSinglePlayerFromInput()">
+                      <i class="bi bi-plus-lg me-1"></i> Add New Player
+                    </button>
+                  </div>
+                  <div id="autocompleteDropdown" class="autocomplete-dropdown list-group d-none bg-white border"></div>
+                </div>
+                <div class="form-text mt-1 text-muted">
+                  <i class="bi bi-info-circle me-1"></i>Select from dropdown to add existing player, or click "Add New Player" (or press Enter) to create.
+                </div>
+              </div>
+
+              <!-- TAB 2: Bulk Multi-Line Entry -->
+              <div class="tab-pane fade" id="multi-pane" role="tabpanel">
+                <textarea class="form-control font-monospace" id="multiPlayerInput" rows="5" placeholder="Enter player names (one per line):&#10;Alice Smith&#10;Bob Johnson&#10;Charlie Brown" oninput="updateMultiLineCounter()"></textarea>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <span class="text-muted small" id="multiLineCounter">0 names detected</span>
+                  <div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary me-2" onclick="clearMultiLineText()">Clear Input</button>
+                    <button type="button" id="addMultiPlayerBtn" class="btn btn-sm btn-primary" onclick="addMultiLinePlayers()">Add All To Roster</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Roster Chip Container -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-medium text-dark">Current Queue Roster</span>
+              <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0 d-none" id="clearRosterBtn" onclick="confirmClearRoster()">
+                <i class="bi bi-trash me-1"></i>Clear Roster
+              </button>
+            </div>
+
+            <div id="rosterContainer" class="p-3 bg-light rounded border d-flex flex-wrap gap-2 align-items-center" style="min-height: 80px;">
+              <!-- Dynamically populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="startSessionBtn" class="btn btn-primary btn-lg w-100 fw-bold py-3">
+            <i class="bi bi-play-circle-fill me-2"></i>Start Matchmaking Session
+          </button>
+        </form>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Edit Player Modal -->
+  <div class="modal fade" id="editPlayerModal" tabindex="-1" aria-labelledby="editPlayerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold text-dark" id="editPlayerModalLabel">
+            <i class="bi bi-pencil-square text-primary me-2"></i>Edit Roster Player
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <button class="actionBtn" onclick="selectMode('round-robin')">Launch Round Robin</button>
-    </div>
+        <div class="modal-body py-3">
+          <form id="editPlayerForm" onsubmit="event.preventDefault(); savePlayerEdit();">
+            <input type="hidden" id="editPlayerIndex">
+            
+            <!-- Name Field -->
+            <div class="mb-3">
+              <label for="editPlayerName" class="form-label fw-medium">Player Name</label>
+              <input type="text" class="form-control" id="editPlayerName" placeholder="Enter player name" required>
+            </div>
 
-    <!-- Mode 2: Win / Lose Bracket -->
-    <div class="card">
-        <div>
-            <span class="badge comp">Competitive</span>
-            <h3 style="margin-bottom: 5px;">🏆 Win / Lose Bracket</h3>
-            <p class="description">
-                Initial round is randomized or paired via established teams. Subsequent rotations shift automatically into performance groupings, pitching matching winner and loser divisions against each other.
-            </p>
+            <!-- Pickleball Rating (6-Star Selector) -->
+            <div class="mb-3">
+              <label class="form-label fw-medium d-block">Pickleball Skill Rating</label>
+              <div class="d-flex align-items-center gap-2 mb-2" id="starRatingContainer">
+                <i class="bi bi-star fs-4 text-warning style-star" onclick="setStarRating(1)" style="cursor:pointer;" title="2.0 - Beginner"></i>
+                <i class="bi bi-star fs-4 text-warning style-star" onclick="setStarRating(2)" style="cursor:pointer;" title="2.5 - Advance Beginner"></i>
+                <i class="bi bi-star fs-4 text-warning style-star" onclick="setStarRating(3)" style="cursor:pointer;" title="3.0 - Novice"></i>
+                <i class="bi bi-star fs-4 text-warning style-star" onclick="setStarRating(4)" style="cursor:pointer;" title="3.5 - Intermediate"></i>
+                <i class="bi bi-star fs-4 text-warning style-star" onclick="setStarRating(5)" style="cursor:pointer;" title="4.0 - Advanced"></i>
+                <i class="bi bi-star fs-4 text-warning style-star" onclick="setStarRating(6)" style="cursor:pointer;" title="4.5+ - Expert / Pro"></i>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-2 py-1 fs-6" id="ratingValueBadge">Unassigned</span>
+                <input type="hidden" id="editPlayerRatingId" value="">
+              </div>
+            </div>
+
+            <!-- Gender Field (Male / Female) -->
+            <div class="mb-3">
+              <label for="editPlayerGender" class="form-label fw-medium">Gender</label>
+              <select class="form-select" id="editPlayerGender">
+                <option value="">Not Specified</option>
+                <option value="M">Male (M)</option>
+                <option value="F">Female (F)</option>
+              </select>
+            </div>
+
+            <div class="modal-footer px-0 pb-0 pt-3 border-top">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary fw-medium" id="saveEditBtn">
+                <i class="bi bi-check-circle me-1"></i>Save Changes
+              </button>
+            </div>
+          </form>
         </div>
-        <button class="startMatchBtn" onclick="selectMode('win-lose')">Launch Bracket</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Mode 3: ELO Balanced Partnering -->
-    <div class="card">
-        <div>
-            <span class="badge balanced">Balanced Skill</span>
-            <h3 style="margin-bottom: 5px;">📊 ELO Balanced</h3>
-            <p class="description">
-                Processes historical skill metrics directly using entry levels scaling from 1.0 to 5.0. Normalizes team aggregates to prevent blowouts while maintaining partner variety.
-            </p>
+  <!-- Active Session Modal -->
+  <div class="modal fade" id="activeSessionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-warning bg-opacity-10 border-warning border-opacity-25">
+          <h5 class="modal-title fw-bold text-dark">
+            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Active Session Running
+          </h5>
         </div>
-        <button class="amberBtn" onclick="selectMode('elo-based')">Launch ELO Engine</button>
+        <div class="modal-body py-4">
+          <p class="mb-2">A game session is currently in progress on the database:</p>
+          <div class="p-3 bg-light rounded border mb-3">
+            <div class="fw-bold text-primary fs-5" id="activeSessionName">--</div>
+            <div class="text-muted small mt-1">
+              Started: <span id="activeSessionStartTime">--</span>
+            </div>
+            <div class="text-dark fw-medium mt-1">
+              Elapsed Time: <span id="activeSessionTimer" class="badge bg-secondary font-monospace">00:00:00</span>
+            </div>
+          </div>
+          <p class="mb-0 text-muted small">You must either resume the current game or end it before starting a new session.</p>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-danger" onclick="endActiveSession()">
+            <i class="bi bi-stop-circle me-1"></i>End Session
+          </button>
+          <button type="button" class="btn btn-primary" onclick="resumeActiveSession()">
+            <i class="bi bi-arrow-right-circle me-1"></i>Resume Session
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 
-</div>
+  <!-- Clear Roster Modal -->
+  <div class="modal fade" id="clearRosterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-body text-center py-4">
+          <i class="bi bi-trash text-danger fs-1 mb-2 d-block"></i>
+          <h5 class="fw-bold">Clear Entire Roster?</h5>
+          <p class="text-muted small mb-3">This will remove all players from your current queue list.</p>
+          <div class="d-flex justify-content-center gap-2">
+            <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal" onclick="executeClearRoster()">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<footer>
-    <p>&copy; 2026 KitchenSync Systems. Stay out of the kitchen.</p>
-</footer>
+  <!-- Toast Container for Notifications -->
+  <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;"></div>
 
-<script>
-function selectMode(mode) {
-    console.log("Selected session infrastructure:", mode);
-    
-    if (mode === 'round-robin') {
-        window.location.href = 'round-robin/round-robin.html'; // Points directly to your existing workspace
-    } else if (mode === 'win-lose') {
-        window.location.href = 'setup-bracket/setup-bracket.html';
-    } else if (mode === 'elo-based') {
-        window.location.href = 'setup-elo.html';
-    }
-}
-</script>
-
+  <!-- JS Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- App JS Files -->
+  <script src="js/db.js"></script>
+  <script src="js/ratings.js"></script>
+  <script src="js/gametypes.js"></script>
+  <script src="js/index.js"></script>
 </body>
 </html>
